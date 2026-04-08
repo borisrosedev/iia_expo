@@ -15,7 +15,7 @@
 - [7. Comportement de la fenêtre : les deux phases](#7-comportement-de-la-fenêtre--les-deux-phases)
 - [8. Mode TCP-Friendly](#8-mode-tcp-friendly)
 - [9. Équité entre flux — RTT-Fairness](#9-équité-entre-flux--rtt-fairness)
-- [10. Déploiement et support système](#10-déploiement-et-support-système)
+- [10. Déploiement et support système](#10-déploiement-et-support)
 - [11. Comparaison CUBIC vs BBR](#11-comparaison-cubic-vs-bbr)
 - [12. Conclusion](#12-conclusion)
 

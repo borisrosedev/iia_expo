@@ -4,20 +4,20 @@
 
 ---
 
-## Plan de l'exposé (≈ 15 minutes)
+## Sommaire
 
-1. Rappels : le contrôle de congestion dans TCP
-2. Limites des algorithmes classiques (Reno, New Reno)
-3. BIC-TCP : l'ancêtre de CUBIC
-4. CUBIC : principes et fonctionnement
-5. La fonction cubique : le cœur de l'algorithme
-6. Les quatre principes de conception
-7. Comportement de la fenêtre : concave + convexe
-8. Mode TCP-Friendly
-9. Équité entre flux (RTT-Fairness)
-10. Déploiement et support système
-11. Comparaison CUBIC vs BBR
-12. Conclusion
+- [1. Rappels — Contrôle de congestion TCP](#1-rappels--contrôle-de-congestion-tcp)
+- [2. Limites des algorithmes classiques](#2-limites-des-algorithmes-classiques)
+- [3. BIC-TCP : l'ancêtre direct de CUBIC](#3-bic-tcp--lancêtre-direct-de-cubic)
+- [4. CUBIC — Définition et contexte](#4-cubic--définition-et-contexte)
+- [5. La fonction cubique : le cœur de l'algorithme](#5-la-fonction-cubique--le-cœur-de-lalgorithme)
+- [6. Les quatre principes de conception (RFC 8312)](#6-les-quatre-principes-de-conception-rfc-8312)
+- [7. Comportement de la fenêtre : les deux phases](#7-comportement-de-la-fenêtre--les-deux-phases)
+- [8. Mode TCP-Friendly](#8-mode-tcp-friendly)
+- [9. Équité entre flux — RTT-Fairness](#9-équité-entre-flux--rtt-fairness)
+- [10. Déploiement et support système](#10-déploiement-et-support-système)
+- [11. Comparaison CUBIC vs BBR](#11-comparaison-cubic-vs-bbr)
+- [12. Conclusion](#12-conclusion)
 
 ---
 

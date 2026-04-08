@@ -237,7 +237,7 @@ sysctl -w net.ipv4.tcp_congestion_control=bbr
 
 ---
 
-## Glossaire — TCP CUBIC
+## Glossaire
 ---
 
 ### Protocoles et algorithmes

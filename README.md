@@ -236,4 +236,4 @@ sysctl -w net.ipv4.tcp_congestion_control=bbr
 
 ---
 
-*Sources : RFC 8312, Ha et al. (2008) ACM SIGOPS, Wikipedia CUBIC TCP, cours RSX102 Boris Rose*
+*Sources : RFC 8312, Ha et al. (2008) ACM SIGOPS, Wikipedia CUBIC TCP, cours de Boris Rose*

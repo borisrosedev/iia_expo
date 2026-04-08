@@ -20,7 +20,7 @@ no- okay si, celle la fonctionne et c'est pourquoi on va en parler.
 
 
 
-# Intro Actual Technical Stuff
+# Actual Technical Stuff
 
 ## TCP - Transmission Control Protocol
 Le TCP ou Transmission Control Protocol, développé par Vint Cert et Bob Kahn puis introduit à l'internet en 1974 est un des protocoles les plus utilisés d'internet d'après Wikipédia.

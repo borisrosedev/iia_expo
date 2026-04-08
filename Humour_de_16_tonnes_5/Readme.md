@@ -21,8 +21,7 @@ no- okay si, celle la fonctionne et c'est pourquoi on va en parler.
 
 
 
-
-# Actual technical stuff
+# Actual Technical Stuff
 
 
 ## Thé C'est Pet toi-même.

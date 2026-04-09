@@ -98,7 +98,7 @@ Client et serveur génèrent chacun une paire de clés éphémère
 → échangent leurs clés publiques éphémères
 → calculent indépendamment le même Pre-Master Secret (protocole Diffie-Hellman)
 ```
-**Avantage** : **PFS** - les clés éphémères sont détruites après la session.
+**Avantage** : **PFS** (Perfect Forward Secrecy) - les clés éphémères sont détruites après la session.
 
 ### 2.5 Dérivation des clés de session
 

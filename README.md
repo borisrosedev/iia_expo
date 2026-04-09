@@ -238,139 +238,159 @@ sysctl -w net.ipv4.tcp_congestion_control=bbr
 ---
 
 ## Glossaire
----
 
 ### Protocoles et algorithmes
 
 **TCP (Transmission Control Protocol)**
 Protocole de transport fiable de la couche 4 du modèle OSI. Il garantit la livraison ordonnée et sans erreur des données grâce aux accusés de réception, numéros de séquence et mécanismes de retransmission.
 
----
-
 **TCP Reno**
 Variante de TCP introduite en 1990 qui implémente l'algorithme AIMD : la fenêtre augmente linéairement tant qu'il n'y a pas de perte, puis est divisée par 2 dès qu'une perte est détectée.
 
----
-
 **New Reno**
-Amélioration de Reno (1996) qui gère mieux les pertes multiples dans une même fenêtre : au lieu de sortir immédiatement de Fast Recovery, New Reno continue à retransmettre les segments manquants un par un.
-
----
+Amélioration de Reno (1996) qui gère mieux les pertes multiples.
 
 **TCP Tahoe**
-Premier algorithme de contrôle de congestion de TCP (Van Jacobson, 1988). En cas de perte, il remet cwnd à 1 et repart en Slow Start, sans Fast Recovery.
+Premier algorithme de contrôle de congestion TCP.
 
----
+**BIC-TCP**
+Algorithme basé sur une recherche binaire pour explorer la bande passante.
 
-**BIC-TCP (Binary Increase Congestion Control)**
-Prédécesseur de CUBIC, défaut de Linux de 2004 à 2006. Il utilise une recherche binaire entre la dernière valeur "sûre" de cwnd et une valeur cible plus haute pour explorer la bande passante disponible. Sa croissance est linéaire par morceaux, ce qui la rend non lisse.
+**CUBIC**
+Algorithme basé sur une fonction cubique du temps pour faire évoluer la fenêtre de congestion.
 
----
-
-**BBR (Bottleneck Bandwidth and RTT)**
-Algorithme développé par Google, basé non pas sur les pertes mais sur un modèle du réseau : il estime en permanence la bande passante maximale disponible et le RTT minimal, puis ajuste son débit en conséquence. Utilisé notamment par YouTube et QUIC.
-
----
+**BBR**
+Algorithme basé sur un modèle du réseau (bande passante + RTT).
 
 **QUIC**
-Protocole de transport développé par Google, fonctionnant au-dessus d'UDP avec TLS 1.3 intégré. C'est la base de HTTP/3. Il gère nativement le multiplexage sans head-of-line blocking.
+Protocole de transport moderne basé sur UDP avec TLS intégré.
 
 ---
 
-### Variables et mécanismes TCP
+### Mécanismes TCP
 
-**cwnd (Congestion Window)**
-Fenêtre de congestion. Variable maintenue par l'émetteur qui limite le nombre d'octets pouvant être envoyés sans avoir reçu d'accusé de réception. Elle est ajustée dynamiquement par l'algorithme de contrôle de congestion.
+**AIMD (Additive Increase, Multiplicative Decrease)**
+Augmentation progressive de la fenêtre, diminution brutale en cas de perte.
 
----
+**Slow Start**
+Phase initiale où la fenêtre double à chaque RTT.
 
-**ssthresh (Slow Start Threshold)**
-Seuil de démarrage lent. Valeur de cwnd à partir de laquelle TCP passe de la croissance exponentielle (Slow Start) à la croissance linéaire (Congestion Avoidance). Initialement grand, il est réduit de moitié à chaque détection de congestion.
+**Congestion Avoidance**
+Phase de croissance linéaire pour éviter la saturation.
 
----
+**Fast Retransmit**
+Retransmission rapide après 3 ACK dupliqués.
+
+**Fast Recovery**
+Phase permettant de continuer sans revenir à Slow Start.
 
 **ACK (Acknowledgment)**
-Accusé de réception. Segment envoyé par le récepteur pour confirmer qu'il a bien reçu des données. En TCP classique, chaque ACK reçu par l'émetteur déclenche une augmentation de cwnd.
+Accusé de réception envoyé par le récepteur.
+
+**ACK dupliqué**
+ACK répété indiquant une perte de paquet.
+
+**Timeout (RTO)**
+Délai après lequel un paquet est retransmis sans ACK.
 
 ---
 
-**MSS (Maximum Segment Size)**
-Taille maximale des données dans un segment TCP, hors en-têtes. Typiquement 1460 octets sur Ethernet (MTU de 1500 octets − 20 octets d'en-tête IP − 20 octets d'en-tête TCP). Négocié lors du handshake.
+### Variables TCP
 
----
+**cwnd (Congestion Window)**
+Nombre d'octets pouvant être envoyés sans ACK.
 
-**RTT (Round Trip Time)**
-Temps aller-retour. Durée mesurée entre l'envoi d'un paquet et la réception de son accusé de réception. C'est la métrique fondamentale pour estimer les délais et calibrer les retransmissions dans TCP.
+**ssthresh**
+Seuil entre Slow Start et Congestion Avoidance.
 
----
+**MSS**
+Taille maximale d'un segment TCP.
+
+**RTT**
+Temps aller-retour d'un paquet.
 
 **β (beta)**
-Facteur de réduction multiplicative de cwnd lors d'une congestion. Dans CUBIC, β ≈ 0,7 (cwnd est réduit à 70 % de sa valeur), contre 0,5 dans Reno (division par 2). Ce réglage plus doux permet une récupération plus rapide.
-
----
+Facteur de réduction de la fenêtre après congestion.
 
 **W_max**
-Valeur de cwnd au moment où la dernière perte de paquet a été détectée. C'est le point d'inflexion de la fonction cubique de CUBIC : la courbe converge vers cette valeur puis repart à l'exploration au-delà.
+Fenêtre maximale atteinte avant perte.
 
----
-
-**BDP (Bandwidth-Delay Product)**
-Produit bande passante × délai. Mesure la quantité de données "en vol" dans le réseau à un instant donné. Un BDP élevé caractérise un Long Fat Network et nécessite une grande fenêtre de congestion pour exploiter pleinement le lien.
+**BDP**
+Produit bande passante × délai.
 
 ---
 
 ### Concepts réseau
 
-**Long Fat Network (LFN)**
-Réseau à fort BDP, c'est-à-dire à la fois haut débit et haute latence (ex. fibre intercontinentale, liens satellite). Les algorithmes comme Reno y sont inefficaces car leur croissance linéaire est trop lente pour remplir le "tuyau".
+**Latence**
+Temps de transmission d'un paquet.
 
----
+**Bande passante**
+Capacité maximale du réseau.
 
-**Flux (flow)**
-Séquence de paquets échangés entre deux hôtes identifiés par le même quintuplet (IP source, IP destination, port source, port destination, protocole). Plusieurs flux peuvent partager un même lien physique.
+**Débit (Throughput)**
+Vitesse réelle de transmission.
 
----
+**Perte de paquet**
+Paquet non reçu.
+
+**File d'attente (Queue)**
+Zone de stockage temporaire dans les routeurs.
 
 **Burst**
-Pic d'envoi : l'émetteur envoie en rafale un grand nombre de paquets en très peu de temps, ce qui peut saturer les files d'attente des routeurs et provoquer des pertes.
+Envoi massif de paquets en peu de temps.
 
----
+**Flux (flow)**
+Suite de paquets entre deux hôtes.
 
 **Point de saturation**
-Valeur de cwnd à partir de laquelle le réseau ne peut plus absorber davantage de données sans commencer à perdre des paquets ou à allonger ses files d'attente.
+Limite où le réseau commence à perdre des paquets.
 
 ---
 
-### Standards et institutions
+### Concepts mathématiques (CUBIC)
 
-**RFC (Request For Comments)**
-Documents publiés par l'IETF qui définissent les standards d'Internet. La RFC 8312 est la spécification officielle de CUBIC ; la RFC 2018 définit SACK, etc.
+**Fonction concave**
+Croissance rapide puis ralentissement.
+
+**Fonction convexe**
+Croissance lente puis accélération.
+
+**Point d'inflexion**
+Changement de forme de la courbe.
+
+**Plateau**
+Zone de stabilité autour de W_max.
+
+---
+
+### Propriétés des algorithmes
+
+**RTT-Fairness**
+Équité entre flux indépendamment du RTT.
+
+**TCP-Friendly**
+Compatibilité avec TCP Reno.
+
+**Scalabilité**
+Capacité à fonctionner efficacement sur de grands réseaux.
 
 ---
 
-**IETF (Internet Engineering Task Force)**
-Organisation internationale qui développe et publie les standards techniques d'Internet sous forme de RFC. Ouverte et collaborative, elle fonctionne par consensus.
+### Standards et systèmes
 
----
+**RFC**
+Documents définissant les standards Internet.
 
-**ACM SIGOPS**
-Revue académique de l'Association for Computing Machinery dédiée aux systèmes d'exploitation. L'article fondateur de CUBIC par Ha, Rhee et Xu y a été publié en 2008.
+**IETF**
+Organisation qui publie les RFC.
 
----
-
-### Commandes et systèmes
-
-**sysctl**
-Outil Linux permettant de lire et modifier des paramètres du noyau en temps réel, sans redémarrage. `net.ipv4.tcp_congestion_control` est le paramètre qui détermine quel algorithme de congestion TCP est actif.
-
----
+**Noyau Linux**
+Cœur du système Linux.
 
 **FreeBSD**
-Système d'exploitation de type UNIX, distinct de Linux, réputé pour sa stabilité et sa robustesse. Il utilise CUBIC comme algorithme de congestion par défaut depuis sa version 14.x.
+Système UNIX.
 
----
+**sysctl**
+Outil pour modifier les paramètres du noyau.
 
-**Noyau Linux (kernel)**
-Le cœur du système d'exploitation Linux, qui gère notamment la pile réseau TCP/IP. CUBIC y est implémenté et activé par défaut depuis la version 2.6.19 (novembre 2006).
-
-*Sources : RFC 8312, Ha et al. (2008) ACM SIGOPS, Wikipedia CUBIC TCP, cours de Boris Rose*

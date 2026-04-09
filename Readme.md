@@ -28,7 +28,7 @@ Le TCP ou Transmission Control Protocol, développé par Vint Cert et Bob Kahn p
 Le protocole TCP établit une connexion entre l'envoyeur des informations et leur receveur, une fois la connexion confirmée par l'envoi d'un rapide message de test, on commence à envoyer les données en sachant que chaque segment TCP (le truc qui contient les données) reçu causera l'envoie d'une confirmation par son receveur. 
 
 Puisqu'être rapide c'est important, on en envoie plusieurs d'un coup et on attends les confirmations.
-Enfin, en assumant que l'on soit encore avant 1986 quand le problème potentiel avait été identifié et ignoré jusqu'à ce qu'un des réseaux principal de la NSFNET, la fondation des réseaux scientifiques des Etats Unis rencontre un problème et passe d'un très respectable taux de transfert de 32 kilobits par secondes à 40 bits par secondes; un problème qui est nommé:
+Enfin, en assumant que l'on soit encore avant 1986 quand le problème potentiel avait été identifié et ignoré jusqu'à ce qu'un des réseaux principal de la NSFNET, la fondation des réseaux scientifiques des Etats Unis rencontre un problème et passe d'un très respectable taux de transfert de 32 kilobits par secondes à 40 bits par secondes; ce qui cause un problème qui est nommé:
 
 
 ## Congestion Collapse (L'effondrement de la congestion)

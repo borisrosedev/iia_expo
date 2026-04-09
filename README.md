@@ -178,6 +178,7 @@ En TLS 1.3, **tout est chiffré dès le ServerHello** → le certificat du serve
 ### C'est quoi un certificat X.509 ?
  
 Un certificat X.509 lie une **identité** (domaine, organisation) à une **clé publique**, le tout signé par une autorité de confiance (CA). C'est ce qui permet à un client TLS de vérifier qu'il parle bien au bon serveur.
+Pour lire un certificat via OpenSSL : openssl x509 -text -in mycert.pem
  
  
 ### Structure d'un certificat

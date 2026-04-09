@@ -37,7 +37,7 @@ Puisque le protocole TCP renvois les segments pour lesquels il n'a pas reçu de 
 
 
 
-## Contrôle de congestion
+# Contrôle de congestion
 
 il va falloir commencer calculer combien d'informations je peux envoyer sur la route en même temps sans que la route ne s'effondre.
 

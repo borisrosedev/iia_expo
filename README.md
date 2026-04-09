@@ -32,23 +32,25 @@ Le handshake doit répondre à trois questions :
 
 TLS 1.2 prend **2 aller-retours** pour son handshake.
 
-```
-Client                                    Serveur
-  |                                          |
-  |----------- ClientHello ----------------->|
-  |<---------- ServerHello ------------------|
-  |<---------- Certificate -----------------|
-  |<---------- ServerKeyExchange (si ECDHE)--|
-  |<---------- ServerHelloDone -------------|
-  |                                          |
-  |----------- ClientKeyExchange ----------->|
-  |----------- ChangeCipherSpec ------------>|
-  |----------- Finished -------------------->|
-  |                                          |
-  |<---------- ChangeCipherSpec ------------|
-  |<---------- Finished --------------------|
-  |                                          |
-  |===== Données applicatives chiffrées ====|
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Serveur
+
+    C->>S: ClientHello
+    S->>C: ServerHello
+    S->>C: Certificate
+    S->>C: ServerKeyExchange (si ECDHE)
+    S->>C: ServerHelloDone
+
+    C->>S: ClientKeyExchange
+    C->>S: ChangeCipherSpec
+    C->>S: Finished
+
+    S->>C: ChangeCipherSpec
+    S->>C: Finished
+
+    Note over C,S: Données applicatives chiffrées
 ```
 
 ### 2.1 ClientHello

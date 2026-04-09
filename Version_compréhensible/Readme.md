@@ -1,4 +1,4 @@
-# Intro (L'humour de 16 tonnes 5 disparaît après 'Actual Technical Stuff')
+# Intro
 
 ## Le PB:
 Les réseaux sont foireux par nature (trop de parties indépendantes) et donc on perd souvent des paquets car ils sont trop gros pour passer par l'intermédiaire n°500 013

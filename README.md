@@ -60,6 +60,7 @@ Le client envoie :
 - Un **Client Random**
 - Les **cipher suites** supportées (Les algos)
 - Les **extensions** (Exemple : courbes elliptiques supportées...)
+
 Une cipher suite encode 4 informations : algorithme d'échange de clés, algorithme d'authentification, algorithme de chiffrement symétrique et algorithme de hash
 
 

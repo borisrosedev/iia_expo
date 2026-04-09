@@ -1,6 +1,5 @@
 # TCP CUBIC
 ### Contrôle de congestion pour les réseaux modernes
-**Boris Rose — RSX102 : Technologies pour les applications en réseau**
 
 ---
 

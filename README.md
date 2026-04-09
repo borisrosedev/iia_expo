@@ -124,20 +124,23 @@ TLS 1.3 est une refonte importante de la 1.2, ces objectifs sont d'être plus ra
 
 ### 3.1 Handshake en 1-RTT (au lieu de 2)
 
-```
-Client                                    Serveur
-  |                                          |
-  |--- ClientHello + key_share ------------->|
-  |    (clé publique ECDHE dès le départ)    |
-  |                                          |
-  |<-- ServerHello + key_share -------------|
-  |<-- {Certificate} ----------------------|  ← déjà chiffré
-  |<-- {CertificateVerify} ----------------|
-  |<-- {Finished} --------------------------|
-  |                                          |
-  |--- {Finished} ------------------------->|
-  |                                          |
-  |=== Données applicatives chiffrées ======|
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Serveur
+
+    C->>S: ClientHello + key_share (clé publique ECDHE)
+
+    Note over S: Dérive les clés de session, peut chiffrer immédiatement
+
+    S->>C: ServerHello + key_share
+    S->>C: Certificate (chiffré)
+    S->>C: CertificateVerify (chiffré)
+    S->>C: Finished (chiffré)
+
+    C->>S: Finished (chiffré)
+
+    Note over C,S: Données applicatives chiffrées
 ```
 
 Le client envoie sa clé publique ECDHE **dès le ClientHello** → le serveur peut dériver les clés et chiffrer sa réponse immédiatement.

@@ -208,6 +208,8 @@ sysctl -w net.ipv4.tcp_congestion_control=bbr
 
 ## 11. Comparaison CUBIC vs BBR
 
+Bottleneck Bandwidth and Round‑trip propagation time est un algorithme de contrôle de congestion pour TCP qui modélise la bande passante et la latence du chemin réseau, plutôt que de se baser uniquement sur la perte de paquets
+
 | Critère | CUBIC | BBR |
 |---|---|---|
 | **Base** | Perte de paquets | Modèle bande passante + RTT |

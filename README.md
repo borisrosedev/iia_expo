@@ -175,6 +175,35 @@ TLS 1.3 : seulement **5 cipher suites** standardisées, toutes sûres.
 En TLS 1.2, les certificats et la négociation sont **en clair** (seules les données applicatives sont chiffrées).  
 En TLS 1.3, **tout est chiffré dès le ServerHello** → le certificat du serveur n'est plus visible par un attaquant.
 
+### C'est quoi un certificat X.509 ?
+ 
+Un certificat X.509 lie une **identité** (domaine, organisation) à une **clé publique**, le tout signé par une autorité de confiance (CA). C'est ce qui permet à un client TLS de vérifier qu'il parle bien au bon serveur.
+ 
+ 
+### Structure d'un certificat
+ 
+| Champ | Contenu |
+|---|---|
+| **Subject** | Identité du propriétaire (`CN=example.com`) |
+| **Issuer** | Qui a signé le certificat (`CN=Let's Encrypt`) |
+| **Validity** | Dates de début et fin de validité |
+| **SAN** | Liste des domaines/IPs couverts (Subject Alternative Name) |
+| **Public Key** | La clé publique du serveur |
+| **Signature** | Hash du certificat signé par la clé privée du CA |
+
+ 
+### Chaîne de confiance
+ 
+On ne fait pas confiance directement au certificat du serveur. On remonte une **chaîne** jusqu'à un Root CA connu du navigateur/ de l'OS.
+ 
+```
+Root CA
+    └── Intermediate CA  (fait le travail quotidien)
+            └── Certificat du serveur
+```
+ 
+> Les Root CA sont gardés hors-ligne et les intermédiaires peuvent être révoqués sans toucher au Root.
+
 ---
 
 ## 4. Attaques classiques contre TLS

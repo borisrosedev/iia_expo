@@ -1,55 +1,87 @@
-# Intro
-
-## Le PB:
-Les réseaux sont foireux par nature (trop de parties indépendantes) et donc on perd souvent des paquets car ils sont trop gros pour passer par l'intermédiaire n°500 013
-
-## La solution:
-Inventer le TCP qui est un protocole s'attendant à recevoir une confirmation de réception pour chaque paquet envoyé et qui renvoie la donnée si il ne reçoit pas de confirmation au bout d'un certain délai. Super, ça fonctionne, on ne perds plus de paquet et internet est désormais aussi robuste que nécessaire pour communiquer depuis n'importe où!
-
-non.
-
-## Le nouveau problème:
-Quand un paquet est trop gros pour l'intermédiaire n°500 013, l'intermédiaire ne le traite pas et n'informe personne du problème, sachant que de toute façon, le paquet sera renvoyer par l'origine. Donc TCP continue d'envoyer deux nouveaux paquets, attend les réponses.. Qui ne viennent pas et envoie donc de nouveau les trois nouveaux paquets.. Qui bloquent à nouveau... Ouais... Ils vont probablement continuer à faire ça longtemps.
+# Algorithme de Ricart-Agrawala
 
 
-## La nouvelle solution:
-Faire des tests avant d'envoyer les données: on va envoyer des paquets bidons de plus en plus gros jusqu'à ce qu'un ne soit pas reçu, après quoi on va retourner à la dernière taille recevable et l'augmenter octet par octet jusqu'à ce qu'il ne soit de nouveau plus recevable. On saura donc la taille maximale que l'on peut transmettre pour rester efficace. Yay !
+## Exclusion Mutuelle
 
-C'est la solution cette fois, pas vrai ?
-no- okay si, celle la fonctionne et c'est pourquoi on va en parler.
+L'algorithme de Ricart-Agrawala est un algorithme d'exclusion mutuelle sur un système distribué. 
+L'exclusion mutuelle (ou mutual exclusion, réduit à mutex car les caractères ça coûte cher (Looking at you, ancient North America!)) est le processus par lequel un environnement informatique assure que plusieurs programmes n'accède pas simultanément à une même ressource. 
 
 
 
-# Actual Technical Stuff
+### Implémentations et problèmes possibles
 
-## TCP - Transmission Control Protocol
-Le TCP ou Transmission Control Protocol, développé par Vint Cert et Bob Kahn puis introduit à l'internet en 1974 est un des protocoles les plus utilisés d'internet d'après Wikipédia.
-
-Le protocole TCP établit une connexion entre l'envoyeur des informations et leur receveur, une fois la connexion confirmée par l'envoi d'un rapide message de test, on commence à envoyer les données en sachant que chaque segment TCP (le truc qui contient les données) reçu causera l'envoie d'une confirmation par son receveur. 
-
-Puisqu'être rapide c'est important, on en envoie plusieurs d'un coup et on attends les confirmations.
-Enfin, en assumant que l'on soit encore avant 1986 quand le problème potentiel avait été identifié et ignoré jusqu'à ce qu'un des réseaux principal de la NSFNET, la fondation des réseaux scientifiques des Etats Unis rencontre un problème et passe d'un très respectable taux de transfert de 32 kilobits par secondes à 40 bits par secondes; un problème qui est nommé:
+Le mutex peut être implémenter de plusieurs façons selon les besoins du système l'hébergeant: Il peux pas exemple limiter l'écriture d'une ressource à un processus mais permettre la lecture de la même ressource pendant cette édition, ce qui peux causer des problèmes comme des valeurs incorrectes quand un programme lis un fichier qui n'a pas encore été éditer par le service apportant les données en temps réél (exemple: Google Map lis le fichier de position GPS avant que le service de positionnement GPS n'inscrive la position actuelle du téléphone. Donc au lieu d'être à Nantes tu es encore à Marseille).
+Certains système d'exclusion mutuelle choisissent, afin d'éviter cela, de ne pas permettre l'écriture d'une ressource pendant qu'elle est en train d'être lue, c'est notamment ce qui arrivée en 1997 durant la mission Mars Pathfinder quand les ingénieurs terrestres ont découvert que les données collectées étaient systématiquement effacée car un processus du robot avait bloquer la mémoire partagée utilisée pour stocker les données collectées en mode écriture, empéchant le processus du disque dur de lire pour les enregistrer à long terme..
 
 
-## Congestion Collapse (L'effondrement de la congestion)
-Puisque le protocole TCP renvois les segments pour lesquels il n'a pas reçu de confirmation de réception, et qu'il en envoie __plusieurs à la fois__, quand un réseau tombe à 40 bits par secondes au lieu de 32 kilobits par secondes, il continue pendant un moment d'envoyer des paquets de 32 kilobits qui sont donc silencieusement rejetés par l'intermédiaire NSFNET; sauf si ils ont la chance de faire moins que 40 bits.
+
+### Solutions possibles
+
+Biensûr, ce genre de cas de figure avaient déjà été imaginée ou rencontrée et des contre-mesures avaient été créées; par exemple: Certains programmeurs choisissent d'imposer l'ordre d'acquisition des ressources pour éviter qu'un processus de faible priorité (exemple: le widget météo) bloque un processus plus important (exemple: le clavier) ou encore d'implanter des systèmes de récupération au cas où leur premier garde-fou échoue. 
+Pour revenir sur l'histoire de Pathfinder: La NASA avait inclu les deux, un redémarrage automatique du système s'effectuait quand un processus occupait une ressource système importante pendant trop longtemps, car ils assumaient que ce processus serait alors buggué. Donc Pathfinder redémarrait.. Encore.. et Encore.. Chaque fois en vidant la RAM contenant les données temporaires... Oups. Heureusement, les ingénieurs s'en sont rendus compte et ont corrigés le code qui empêchait la libération de la ressource système !
+
+
+
+#### Précision
+
+Pathfinder n'utilisait pas l'algorithme Ricart-Agrawala, c'était uniquement un exemple pour l'exclusion mutuelle.
 
 
 
 
-## Contrôle de congestion
-
-il va falloir commencer calculer combien d'informations je peux envoyer sur la route en même temps sans que la route ne s'effondre.
 
 
-## AIMD - Additive Increase/Multiplicative Decrease algorithm
-L'algorithme d'augmentation additive et de réduction multiplicative est un algorithme que l'on qualifiera de closed loop control algorithm.
+## Système distribué
 
-Basiquement, TCP va utiliser AIMD pour envoyer des paquets de plus en plus gros les uns à la suite des autres jusqu'à ne plus avoir de réponse (en faisant des additions à la taille, d'où le additive de AIMD), après quoi on réduit multiplicativement la taille. Ensuite on recommence jusqu'à ne plus pouvoir additionner sans perdre le paquet! 
-Vous pouvez imaginer que l'on ajoute 5 octets au paquet de test chaque fois qu'il est reçu et qu'on divise ses octets par deux quand ce n'est pas le cas.
+Un système distribué, contrairement à un système centralisé, est un système dont les ressources ne sont pas au même endroit. Exemple: Internet. Vous n'avez pas toutes les données d'internet sur votre disque dur.
+Un système centralisé serait donc un ordinateur sans aucun réseau autre que celui le liant à ses composants. (Maintenant, est-ce que mon ordinateur s'exécutant sur une machine virtuelle s'exécutant elle-même sur plusieurs serveurs différents d'un cloud est un système centralisé ou un système distribué ? Ca dépend probablement du point de vue.)
 
 
-## CWND - Congestion WiNDow
-Cela nous permet d'établir la CWND ou fenêtre de congestion. Contrairement à la receive window qui est maintenue et communiquée par le receveur des informations (rappel: la fenêtre qui dit combiens d'octets l'envoyeur peux balancer d'un coup sans attendre de réponse, on l'a aussi vue sous le nom de sliding window. Elle utilise elle aussi AIMD), la CWND elle est maintenue et gardée par l'envoyeur des données à transmettre.
 
-Elle n'est pas communiquée car elle ne sert qu'à savoir quels taille de paquets sont recevables par le receveur car bien qu'il soit utile de communiquer la receive window à l'origine des infos puisqu'elle est calculée par la destination mais utilisée par l'origine, et la sliding window à la destination car elle est calculée par l'origine mais utilisée par la destination; envoyée la congestion window est inutile et n'est donc pas fait.
+
+
+
+## A quoi sert l'algorithme Ricart-Agrawala ?
+
+L'algorithme de Glenn Ricart et Ashok K. Agrawala sert est une optimisation l'algorithme d'exclusion mutuelle de Lamport.
+
+
+
+### Algorithme d'exclusion mutuelle de Lamport
+
+L'algorithme d'exclusion mutuelle de Lamport fonctionne, de manière très grossière, comme ceci:
+- Chaque processus à une pile de demandes d'accès à des ressources mutuellement excluse (ressources que l'on ne peux pas lire et écrire ou écrire avec 2 processus à la fois).
+
+- Pour demander l'acccès à une ressource, un processus envoie une demande d'accès dans sa propre pile de demandes d'accès afin d'y inscrire le moment de la demande en "Temps Lamport" (Une horloge logique (pas physique mais logicielle) qui sert à synchroniser des processus asynchrones entre eux. Quand un processus reçoit une requête, il se connecte brièvement au processus à l'origine de la requête et synchronise son horaire avec lui. A noter que si deux événements (genre écrire "Chat" dans "Chat.txt" et "Chien" dans "Chien.txt") ont lieu sans interagir l'un avec l'autre, l'horloge de Lamport sera incapable de savoir lequel à eu lieu en premier; elle ne sert qu'a synchroniser des processus interagissant entre eux.)
+
+- Il envoie sa demande d'accès à tous les services et attends la réponse de tous les services.
+
+- Il accède à la ressource **une fois que sa requête est en haut de la pile** (Car les requêtes d'accès des autres services/processus (synonyme) sont aussi stockés dans cette pile) **et qu'il à reçu la réponse de tout les processus**.
+
+- Une fois son accès à la ressource terminée, il retire sa demande d'accès de sa propre pile et envoie un message indiquant aux autres services que son accès est terminé et que la ressource est de nouveau libre. Les autres services retirent donc également la demande d'accès du premier service à cette ressource de leurs propres piles.
+
+
+
+### Comment l'algorithme Ricart-Agrawala  optimise-t-il l'algorithme de Lamport ?
+
+L'algorithme utilise l'horloge de Lamport (Un autre algorithme utilisé pour informer les processus d'un système asynchrone des relations de causalité de leurs événements. En gros: Dire à plusieurs processus ne s'exécutant pas en même temps "Qu'est-ce qui est arrivé en premier, et plus généralement qu'est-ce qui est arrivé avant moi ?". **Sauf que lui le fait "tout seul" sans broadcast chaque accès et libération de ressource à tous les services**.) afin de diminuer le nombre de messages échangés par accès à des ressources mutuellement exclusives et à complètement éliminer le besoin de messages de libérations.
+
+Fonctionnement (Presque le même principe que l'algorithme d'exclusion mutuelle de Lamport):
+
+- Quand un service veux accéder à une ressource, il envoie un message à tous les autres processus afin de leur demander si ils utilisent la ressource.
+
+- Si tous les processus lui répondent qu'ils n'utilisent pas actuellement la ressource, alors il accède à la ressource. Si notre service ne reçoit pas une réponse de la part d'un des processus, il assume que ce processus utilise actuellement la ressource cible et reste en attente. (Le processus utilisant la ressource répondra qu'il n'utilise plus la ressource après qu'il a libéré la ressource **il ne dira jamais explicitement qu'il est en train de l'utiliser, c'est là qu'on gagne des messages**)
+
+- Une fois l'accès à la ressource obtenue, il commence à l'écrire/la lire.
+
+- Le service *n'enverra pas forcément* de message de libération de la ressource. Il ne le fera **que si un autre processus avait demander si la ressource été libre pendant qu'il l'occuppait**. Donc si personne ne voulait la ressource pendant qu'il l'éditait: Il n'avertira personne que la ressource est libre. On économise encore plus de messages !
+Cela fonctionne car les processus ne se 'souviennent pas' de quelle ressources sont en train d'être utilisée par d'autres services; ils ne connaissent que les ressources qu'ils utilisent et assument que toutes les autres ressources sont libres jusqu'à ce qu'ils ne reçoivent pas de réponse quand ils demandant si cette ressource est occupée. Ils n'ont donc pas besoin de recevoir de message de libération parlant d'une ressource dont ils n'avaient rien à faire.
+Problème possible: Si un processus se bloque sur une ressource, il ne répondra jamais aux messages des autres et la bloquera 'pour toujours'. Oui. Mais comme pour le robot Pathfinder, les programmeurs auront (probablement) mit en place un garde-fou qui gérera ce cas de figure, par exemple en redémarrant tout le système ou juste le service affecté si il cesse de répondre pendant 'trop longtemps' (valeure abritraire définie par le programmer du garde-fou).
+
+
+
+### Détails
+
+L'algorithme d'exclusion mutuelle de Ricart-Agrawala à une **complexité de 2 * (N - 1)**, où N est le nombre de processus tentant d'accèder à une ressource mutuellement exclusive. (Voir https://de.wikipedia.org/wiki/Ricart-Agrawala-Algorithmus (Version allemande de la page); les autres versions ne détaille pas le calcul de complexité (English) ou utilisent un mot qui apparaît exclusivement dans l'explication du calcul, sans explication de ce qu'il représente (Français))
+
+L'algorithme d'exclusion mutuelle de Lamport, lui, avait **une complexité de 3 * (N -1)**; où N est également le nombre de processus tentant d'accèder à une ressource mutuellement exclusive. (Ce qui est très bien détaillé dans la version anglaise ( https://en.wikipedia.org/wiki/Lamport's\_distributed\_mutual\_exclusion_algorithm ) de la page; heureusement, car c'est la seule version de la page qui existe!)

@@ -62,7 +62,7 @@ L'algorithme d'exclusion mutuelle de Lamport fonctionne, de manière très gross
 
 
 
-### Comment l'algorithme Ricart-Agrawala  optimise-t-il l'algorithme de Lamport ?
+### Comment l'algorithme Ricart-Agrawala  optimise-t-il l'algorithme de Lamport ?
 
 L'algorithme utilise l'horloge de Lamport (Un autre algorithme utilisé pour informer les processus d'un système asynchrone des relations de causalité de leurs événements. En gros: Dire à plusieurs processus ne s'exécutant pas en même temps "Qu'est-ce qui est arrivé en premier, et plus généralement qu'est-ce qui est arrivé avant moi ?". **Sauf que lui le fait "tout seul" sans broadcast chaque accès et libération de ressource à tous les services**.) afin de diminuer le nombre de messages échangés par accès à des ressources mutuellement exclusives et à complètement éliminer le besoin de messages de libérations.
 
@@ -84,4 +84,4 @@ Problème possible: Si un processus se bloque sur une ressource, il ne répondra
 
 L'algorithme d'exclusion mutuelle de Ricart-Agrawala à une **complexité de 2 * (N - 1)**, où N est le nombre de processus tentant d'accèder à une ressource mutuellement exclusive. (Voir https://de.wikipedia.org/wiki/Ricart-Agrawala-Algorithmus (Version allemande de la page); les autres versions ne détaille pas le calcul de complexité (English) ou utilisent un mot qui apparaît exclusivement dans l'explication du calcul, sans explication de ce qu'il représente (Français))
 
-L'algorithme d'exclusion mutuelle de Lamport, lui, avait **une complexité de 3 * (N -1)**; où N est également le nombre de processus tentant d'accèder à une ressource mutuellement exclusive. (Ce qui est très bien détaillé dans la version anglaise ( https://en.wikipedia.org/wiki/Lamport's\_distributed\_mutual\_exclusion_algorithm ) de la page; heureusement, car c'est la seule version de la page qui existe!)
+L'algorithme d'exclusion mutuelle de Lamport, lui, avait **une complexité de 3 * (N -1)**; où N est également le nombre de processus tentant d'accèder à une ressource mutuellement exclusive. (Ce qui est très bien détaillé dans la version anglaise ( https://en.wikipedia.org/wiki/Lamport's_distributed_mutual_exclusion_algorithm ) de la page; heureusement, car c'est la seule version de la page qui existe!)

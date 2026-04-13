@@ -16,10 +16,107 @@ C'est le **problème du consensus distribué**.
 
 ## 2. Contexte historique
 
-- **1989** : Leslie Lamport publie *The Part-Time Parliament* (refusé par des reviewers, jugé trop fantaisiste).
-- **1998** : Publication finalement acceptée dans *ACM Transactions on Computer Systems*.
-- **2001** : Lamport publie *Paxos Made Simple*, une version plus accessible.
-- **2013** : Lamport reçoit le Prix Turing pour ses travaux sur les systèmes distribués.
+### Avant Paxos : un problème déjà connu mais mal formalisé
+
+Dans les années 1970–1980, les systèmes distribués commencent à apparaître (réseaux, bases de données réparties, etc.).
+Très vite, une question fondamentale se pose :
+
+Comment plusieurs machines peuvent-elles prendre une décision commune si certaines tombent en panne ou si le réseau est instable ?
+
+Un résultat théorique majeur arrive en 1985 avec le théorème FLP impossibility theorem (Fischer, Lynch, Paterson) :
+
+Dans un système asynchrone (pas de limite de temps sur les messages)
+Avec au moins une panne possible il est impossible de garantir qu’un algorithme de consensus termine toujours.
+
+💡 Conséquence énorme :
+On ne peut pas construire un consensus parfait → seulement des compromis (sécurité vs progression).
+
+### 1989 : naissance de Paxos (mais incompris)
+
+Leslie Lamport publie The Part-Time Parliament.
+
+Mais il fait un choix… particulier :
+
+Il explique Paxos avec une analogie politique grecque antique (une assemblée appelée Paxos)
+Résultat : les reviewers trouvent ça trop confus / fantaisiste
+👉 l’article est refusé
+
+💡 Ironie :
+
+L’algorithme est correct et révolutionnaire
+Mais personne ne le comprend vraiment à l’époque
+
+### 1990–1998 : redécouverte et reconnaissance
+
+Pendant les années 90 :
+
+Le besoin explose (bases distribuées, systèmes fault-tolerant)
+Plusieurs chercheurs redécouvrent des idées similaires à Paxos
+
+Finalement :
+
+L’article est publié en 1998 dans ACM Transactions on Computer Systems
+Paxos devient une référence académique
+
+### 2001 : simplification avec Paxos Made Simple
+
+Lamport publie :
+
+👉 Paxos Made Simple
+
+Objectif :
+
+expliquer Paxos sans métaphore obscure
+rendre l’algorithme compréhensible
+
+Mais même là :
+
+Paxos reste réputé difficile
+
+beaucoup d’ingénieurs disent :
+
+“Si tu penses avoir compris Paxos, tu ne l’as probablement pas compris”
+
+### Années 2000 : passage à l’industrie
+
+Le vrai tournant, c’est l’adoption par les grandes entreprises :
+
+Google (2006)
+Développe Google Chubby
+Utilise Paxos pour :
+gérer des verrous distribués
+coordonner des systèmes comme Bigtable
+
+👉 C’est la preuve que Paxos fonctionne en production
+
+### Années 2010 : simplification et alternatives
+
+Problème : Paxos est trop complexe à implémenter correctement
+
+Donc arrivent des variantes :
+
+Raft (2014)
+même garanties que Paxos
+beaucoup plus compréhensible
+Apache ZooKeeper
+utilise Zab (inspiré de Paxos)
+etcd
+utilise Raft (Kubernetes)
+
+👉 Paxos devient surtout :
+
+une base théorique
+plus qu’un algo directement utilisé tel quel
+
+### 2013 : reconnaissance ultime
+
+Leslie Lamport reçoit le prix Turing (équivalent du Nobel en informatique)
+
+👉 Pour :
+
+Paxos
+ses travaux sur les systèmes distribués
+la logique temporelle
 
 > Paxos est aujourd'hui le fondement de nombreux systèmes : **Google Chubby**, **Apache Zookeeper**, **etcd** (Kubernetes), **CockroachDB**.
 

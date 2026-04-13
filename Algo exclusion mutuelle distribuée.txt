@@ -1,0 +1,142 @@
+1. Introduction
+
+Bonjour à tous.
+ 
+Imaginez la scène suivante.
+Vous êtes dans un open space, et l'imprimante partagée du bureau est là, au fond de la salle. Vous envoyez votre document. Votre collègue fait pareil au même moment. Et votre chef aussi. Résultat : les trois impressions se mélangent, les pages sont dans le désordre, certaines sont illisibles. C'est le chaos.
+ 
+Maintenant, imaginez que ce scénario ne se passe pas avec trois collègues dans un bureau, mais avec des centaines, voire des milliers d'ordinateurs répartis aux quatre coins du monde, qui essaient tous d'accéder à la même donnée, au même instant, sans qu'il y ait de chef pour arbitrer.
+ 
+C'est exactement le problème que l'algorithme d'exclusion mutuelle distribuée cherche à résoudre.
+ 
+Aujourd'hui, je vais vous expliquer ce problème, vous montrer comment on le résout, et à la fin, vous allez pouvoir le résoudre vous-mêmes avec un petit exercice. Promis, c'est accessible et fun !
+
+2. Le problème de la ressource partagée
+2.1  Qu'est-ce qu'une ressource partagée ?
+En informatique, une ressource partagée, c’est plusieurs programmes qui veulent etre utiliser en même temps : un fichier, une base de données, une zone mémoire, une connexion réseau.
+ 
+Le problème vient du fait que certaines opérations doivent se faire de façon atomique — c'est-à-dire sans être interrompues.
+Par exemple, si une banque doit débiter 100 euros de votre compte, elle doit lire le solde, faire la soustraction, et écrire le nouveau solde. Si deux opérations font ça en même temps, on peut se retrouver avec un solde incorrect. C'est ce qu'on appelle une condition de course, ou en anglais, un race condition.
+
+
+2.2  La section critique
+Pour éviter ce problème, on définit ce qu'on appelle une section critique. C'est la portion du code qui accède à la ressource partagée. La règle d'or est simple :
+ 
+🔴  UN SEUL processus peut se trouver dans la section critique à la fois.
+ 
+C'est exactement comme les toilettes dans un avion : il y a une petite lumière rouge ou verte. Quand c'est rouge, vous attendez. Quand c'est vert, c'est votre tour. Un seul passager à la fois. Tout le monde respecte ça, et tout se passe bien.
+
+2.3  Centralisé, c'est facile. Distribué, c'est le défi.
+Dans un système centralisé — un seul ordinateur — c'est simple. Il y a un système d'exploitation qui joue le rôle d'arbitre. Il gère les accès, distribue les tours, et tout le monde obéit.
+ 
+Mais dans un système distribué — plusieurs machines sur un réseau — il n'y a pas de chef central. Chaque machine est indépendante. Elles ne partagent pas de mémoire commune. Et elles communiquent uniquement par des messages, qui peuvent prendre du temps, arriver dans le désordre, voire se perdre.
+ 
+La question qui se pose alors est : comment ces machines peuvent-elles s'organiser seules pour accéder à une ressource partagée, sans qu'aucune d'elles ne soit le chef ?
+ 
+ 
+
+3. Ce que doit garantir un bon algorithme
+Avant de voir comment on résout ce problème, je veux vous présenter les trois garanties qu'un algorithme d'exclusion mutuelle doit obligatoirement respecter. Ce sont un peu les trois commandements de ce domaine.
+ 
+Première : la Sécurité, ou Safety en anglais.
+🔴  À tout instant, au maximum un seul processus est dans la section critique.
+C'est la règle numéro un, absolue, non négociable. Si deux processus entrent en même temps, l'algorithme a échoué.
+ 
+Deuxième garantie : la Vivacité, ou Liveness.
+🔴  Si un processus veut entrer dans la section critique, il finira toujours par y entrer.
+On veut éviter ce qu'on appelle l'interblocage, ou deadlock : une situation où tout le monde attend que quelqu'un d'autre passe en premier, et personne ne bouge plus jamais.
+ 
+Troisième garantie : l'Équité, ou Fairness.
+🔴  Les demandes doivent être traitées dans un ordre juste — généralement l'ordre d'arrivée.
+On veut éviter la famine — l un processus attend indéfiniment parce que les autres passent toujours avant lui.
+ 
+Ces trois propriétés forment le cahier des charges de tout algorithme d'exclusion mutuelle. C'est le critère qui permet de juger si un algorithme est correct ou non.
+ 
+
+4. L'algorithme de Ricart-Agrawala
+💡 C'est la partie centrale
+
+4.1  L'idée fondamentale
+En 1981, deux chercheurs américains — Glenn Ricart et Ashok Agrawala — ont publié un algorithme pour résoudre ce problème. L'idée centrale est la suivante :
+ 
+🔴  Pour entrer dans la section critique, un processus doit obtenir l'accord explicite de TOUS les autres processus.
+ 
+C'est un peu comme dans une assemblée où l'hunanimité est requise. Vous ne pouvez prendre la parole que si tout le monde lève la main pour dire oui.
+
+4.2  Les horloges logiques : donner un ordre au chaos
+Mais il y a une difficulté immédiate. Dans un système distribué, les machines n'ont pas toutes la même horloge.
+Leurs pendules sont légèrement désynchronisées. Alors, comment savoir qui a demandé en premier ?
+ 
+L'algorithme de Ricart-Agrawala utilise pour ça un outil appelé l'horloge logique de Lamport. Le principe est simple : chaque message porte un numéro, appelé timestamp, ou horodatage.
+
+ Ce numéro n'est pas lié au temps réel de l'horloge murale — c'est juste un compteur logique qui permet d'ordonner les événements.
+ 
+La règle est : si je reçois un message avec le numéro 7, je mets mon propre compteur au moins à 8 pour le prochain message que j'enverrai. Cela garantit que les événements peuvent toujours être mis dans un ordre cohérent, même si les horloges des machines ne sont pas synchronisées.
+ 
+4.3  Le fonctionnement étape par étape
+Voici comment l'algorithme fonctionne concrètement. Prenons trois machines : A, B et C.
+ 
+Étape 1 — La demande.
+Le processus A veut entrer dans la section critique. Il envoie un message REQUEST à tous les autres — ici, B et C. Ce message contient son timestamp, par exemple le numéro 5.
+ 
+Étape 2 — La réception et la décision.
+B et C reçoivent la demande de A. Ils ont maintenant deux possibilités.
+•    Soit ils n'ont pas besoin de la section critique en ce moment : dans ce cas, ils répondent immédiatement OK à A.
+•    Soit ils veulent aussi la section critique : dans ce cas, ils comparent leur propre timestamp avec celui de A. Celui qui a le plus petit timestamp a priorité.
+ Si les timestamps sont identiques — ce qui peut arriver — on départage par l'identifiant de la machine. A < B alphabétiquement, donc A passe en premier dans ce cas.
+ 
+Étape 3 — L'entrée dans la section critique.
+Dès que A a reçu un OK de TOUS les autres processus, il peut entrer dans la section critique. Cette garantie assure qu'aucun autre processus ne sera entré en même temps.
+ 
+Étape 4 — La libération.
+Quand A a terminé son travail dans la section critique, il envoie un message RELEASE à tous les autres. Ceux qui avaient leur demande en attente peuvent alors vérifier s'ils ont maintenant tous les OK nécessaires pour entrer à leur tour.
+ 
+
+4.4  Les limites de cet algorithme
+Cet algorithme est beau dans sa simplicité, mais il a des limites pratiques importantes.
+ 
+La première limite, c'est le nombre de messages. Pour N processus, chaque demande génère 2×(N-1) messages : N-1 requêtes et N-1 réponses. Sur un réseau de mille machines, cela représente des milliers de messages pour chaque accès. C'est très coûteux.
+ 
+La deuxième limite, c'est la tolérance aux pannes. Si une seule machine tombe en panne et ne répond plus, tout le système se bloque — car le processus demandeur attend un OK qui ne viendra jamais. Des variantes de l'algorithme ont été développées pour gérer ce problème, avec des mécanismes de détection de pannes et de timeout.
+ 
+C'est pour ces raisons qu'en pratique, on utilise souvent des approches hybrides, comme l'algorithme basé sur un anneau logique — où les machines sont organisées en cercle et se passent un jeton virtuel , où il suffit d'avoir l'accord d'une majorité plutôt que de tout le monde.
+ 
+  PARTIE 5 — Exercice interactif   (~ 2 minutes) 
+ 
+5. Exercice : à vous de jouer !
+
+Maintenant c'est votre tour. Je vais vous soumettre un petit problème concret, et je vous demande d'y réfléchir pendant 30 secondes.
+ 
+Énoncé :
+Trois processus — A, B et C — envoient tous en même temps une demande d'accès à la ressource partagée. Leurs timestamps sont les suivants :     	
+•  Processus A → timestamp 5    	
+•  Processus B → timestamp 3   	
+ •  Processus C → timestamp 8 
+Question : dans quel ordre les processus vont-ils accéder à la ressource ? 
+ Bonus : que se passe-t-il si A et B avaient le même timestamp ?
+ 
+Prenez 30 secondes pour y réfléchir...
+ 
+
+
+Correction :
+La règle est simple : le plus petit timestamp passe en premier.
+ 
+•    B a le timestamp 3 — c'est le plus petit. B entre en premier dans la section critique.
+•    A a le timestamp 5 — A entre en deuxième.
+•    C a le timestamp 8 — C entre en dernier.
+ 
+L'ordre est donc : B → A → C.
+ 
+Pour le bonus : si A et B avaient tous les deux le timestamp 5, on applique une règle de départage supplémentaire — l'identifiant de la machine. Comme A vient avant B dans l'ordre numérique ou alphabétique, A passe en premier. Cette règle garantit qu'il y a toujours un ordre unique, et que le système ne se bloque jamais en cas d'égalité.
+ 
+6. Conclusion
+
+Pour conclure, l'exclusion mutuelle distribuée, c'est l'art de faire collaborer des machines indépendantes de façon ordonnée, sans chef, uniquement par l'échange de messages et la confiance dans des règles communes.
+ 
+L'algorithme de Ricart-Agrawala illustre bien cette philosophie : une solution mathématiquement simple, basée sur une idée forte
+et sur un outil ingénieux — l'horloge logique.
+ 
+Ce type de mécanisme est au cœur de technologies que vous utilisez tous les jours : les bases de données distribuées, les systèmes de fichiers en réseau, ou encore les applications collaboratives en temps réel.
+ 
+Je vous remercie pour votre attention. Je suis disponible pour vos questions.

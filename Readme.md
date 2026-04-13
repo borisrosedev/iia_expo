@@ -222,3 +222,50 @@ Lien RSX102      → TCP fiable à 2 hôtes → Paxos fiable à N hôtes
 - Ongaro, D. & Ousterhout, J. (2014). *In Search of an Understandable Consensus Algorithm (Raft)*.
 - Google (2006). *The Chubby Lock Service for Loosely-Coupled Distributed Systems*.
 - Cours — Boris Rose (2026).
+
+---
+
+## 14. Glossaire
+
+| Terme | Définition |
+|-------|------------|
+| **ACK (Acknowledgement)** | Message de confirmation envoyé par un récepteur pour signaler qu'il a bien reçu des données. En TCP, chaque segment reçu donne lieu à un ACK. |
+| **AIMD (Additive Increase, Multiplicative Decrease)** | Algorithme de contrôle de congestion TCP : la fenêtre d'émission augmente linéairement en l'absence de perte, et est divisée par deux dès qu'une perte est détectée. |
+| **Bigtable** | Système de stockage distribué développé par Google, utilisé pour structurer de très grands volumes de données. Utilise Chubby pour la coordination. |
+| **Byzantine failure (panne byzantine)** | Type de panne où un nœud ne se contente pas de tomber en panne mais envoie des informations incorrectes ou contradictoires. Plus difficile à tolérer que les crash failures. |
+| **BFT (Byzantine Fault Tolerance)** | Famille de protocoles permettant à un système distribué de continuer à fonctionner correctement même en présence de nœuds byzantins. |
+| **Crash failure (panne franche)** | Type de panne où un nœud s'arrête brutalement et cesse toute communication. C'est le modèle de panne assumé par Paxos. |
+| **CockroachDB** | Base de données relationnelle distribuée et tolérante aux pannes, utilisant Raft pour assurer la cohérence des données entre répliques. |
+| **EPaxos (Egalitarian Paxos)** | Variante de Paxos sans leader unique : toutes les répliques peuvent proposer des valeurs, ce qui réduit la latence en exploitant la localité géographique. |
+| **etcd** | Base de données clé-valeur distribuée utilisée comme magasin de configuration central de Kubernetes. Repose sur l'algorithme Raft. |
+| **Fast Retransmit** | Mécanisme TCP permettant de retransmettre un segment perdu sans attendre l'expiration du timer de retransmission, dès réception de trois ACK dupliqués. |
+| **Fenêtre glissante (cwnd, congestion window)** | Mécanisme TCP limitant le nombre de segments pouvant être envoyés sans accusé de réception, afin de contrôler le débit et éviter la congestion. |
+| **GFS (Google File System)** | Système de fichiers distribué développé par Google, conçu pour stocker de très grands fichiers sur des grappes de serveurs ordinaires. |
+| **Google Chubby** | Service de verrou distribué développé par Google, basé sur Paxos. Il sert à coordonner l'accès à des ressources partagées entre des services distribués. |
+| **Google Spanner** | Base de données relationnelle globalement distribuée de Google, offrant des transactions cohérentes à l'échelle mondiale grâce à Multi-Paxos et des horloges atomiques. |
+| **HBase** | Base de données NoSQL distribuée, modélisée d'après Bigtable, fonctionnant sur Hadoop et utilisant ZooKeeper pour la coordination. |
+| **Hadoop** | Framework open-source de traitement distribué de grands volumes de données. Utilise ZooKeeper pour la coordination de ses composants. |
+| **High-latency connection** | Connexion réseau présentant un temps de propagation élevé, typiquement les liaisons satellite ou intercontinentales. |
+| **Instance Paxos** | Exécution indépendante du protocole Paxos pour décider d'une seule valeur dans un log. Multi-Paxos enchaîne des instances numérotées pour construire un log ordonné. |
+| **Kafka** | Plateforme de streaming d'événements distribuée, utilisant ZooKeeper (ou KRaft depuis les versions récentes) pour la coordination de ses brokers. |
+| **Kubernetes** | Système d'orchestration de conteneurs open-source. Sa configuration est stockée dans etcd, qui repose sur Raft. |
+| **Leader (dans Multi-Paxos)** | Nœud désigné comme seul Proposer actif dans Multi-Paxos. Sa stabilité permet de supprimer la Phase 1 pour les rounds successifs et d'éviter les conflits entre proposers. |
+| **Liveness** | Propriété d'un protocole garantissant qu'il progresse effectivement vers une décision. Un protocole sûr mais sans liveness peut bloquer indéfiniment. |
+| **Log de commandes** | Séquence ordonnée d'opérations à appliquer à un état partagé. Multi-Paxos est typiquement utilisé pour construire un tel log de manière cohérente entre répliques. |
+| **Lossy network (réseau à pertes)** | Réseau dans lequel des paquets peuvent être perdus en transit, notamment à cause de la congestion ou de liens défaillants. |
+| **MapReduce** | Modèle de programmation distribué de Google pour traiter de grands volumes de données en parallèle sur un cluster. |
+| **Middlebox** | Équipement réseau intermédiaire (pare-feu, NAT, proxy, load balancer) qui peut inspecter ou modifier le trafic entre deux hôtes. |
+| **MPTCP (Multipath TCP)** | Extension de TCP permettant d'utiliser simultanément plusieurs chemins réseau (interfaces) pour une même session, améliorant le débit et la résilience. |
+| **Nœud (node)** | Machine participante d'un système distribué. Un nœud peut jouer un ou plusieurs rôles dans Paxos (Proposer, Acceptor, Learner). |
+| **PBFT (Practical Byzantine Fault Tolerance)** | Protocole de consensus tolérant les pannes byzantines, permettant à un système de fonctionner correctement même si certains nœuds se comportent de manière malveillante. Coût en communication plus élevé que Paxos. |
+| **Quorum** | Sous-ensemble minimum de nœuds devant participer à une décision pour qu'elle soit valide. Dans Paxos, le quorum est la majorité stricte : ⌊N/2⌋ + 1 nœuds. |
+| **Raft** | Algorithme de consensus conçu pour être plus compréhensible que Paxos, avec les mêmes garanties. Il structure explicitement l'élection de leader et la réplication de log. |
+| **Réplique** | Copie d'un état ou d'une donnée maintenue sur plusieurs nœuds pour assurer la disponibilité et la tolérance aux pannes. |
+| **Round (numéro de round)** | Identifiant numérique croissant associé à chaque tentative de proposition dans Paxos. Permet de totalement ordonner les propositions et de résoudre les conflits. |
+| **SCTP (Stream Control Transmission Protocol)** | Protocole de transport alternatif à TCP et UDP, offrant le multi-homing et le multi-streaming, mais peu déployé en pratique en raison de la compatibilité limitée avec les middleboxes. |
+| **Slow Start** | Phase initiale du contrôle de congestion TCP où la fenêtre d'émission croît exponentiellement jusqu'à un seuil, permettant de sonder rapidement la capacité du réseau. |
+| **SYN / SYN-ACK** | Premiers messages de l'établissement de connexion TCP en trois étapes (three-way handshake) : le client envoie SYN, le serveur répond SYN-ACK, puis le client confirme avec ACK. |
+| **TCP Fast Open (TFO)** | Extension de TCP permettant d'envoyer des données dès le premier paquet SYN grâce à un cookie préalablement échangé, réduisant la latence d'établissement de connexion. |
+| **TiKV** | Base de données clé-valeur distribuée transactionnelle, utilisée notamment par TiDB. Repose sur Raft pour la réplication. |
+| **Viewstamped Replication** | Protocole de consensus distribué publié par Liskov et Cowling, antérieur à Paxos et proposant des garanties équivalentes. |
+| **Zab (ZooKeeper Atomic Broadcast)** | Protocole de diffusion atomique totalement ordonné utilisé par Apache ZooKeeper, inspiré de Multi-Paxos et optimisé pour la coordination de services distribués. |

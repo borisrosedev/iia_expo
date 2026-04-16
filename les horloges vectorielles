@@ -1,0 +1,94 @@
+MÉMO : Les Horloges Vectorielles (Vector Clocks)
+
+Question sur qu’elles sont les deux façons de synchroniser les données pendant un échange
+
+Indice : un truc pas ouf qui prends bcp de perf serveurs. 
+ un truc qu’on as vu avec Boris qui à le mot chaussettes en anglais 
+
+Mais on nous as menti, et pour comprendre les horloges vectorielles il faut comprendre que le « temps réel » n’existe pas vraiment
+
+1. Le Problème : L'absence de temps global
+* Constat : Dans un système distribué (plusieurs serveurs/utilisateurs), les horloges internes ne sont jamais parfaitement synchronisées.
+* Le risque : Si on se fie à l'heure locale (Timestamp), on peut écraser une donnée récente par une plus ancienne à cause d'un décalage de quelques millisecondes.
+* Solution : Utiliser un temps logique (basé sur l'ordre des événements) plutôt que physique (basé sur l'heure) c’est la que les horloges vectorielles entres en jeu
+
+Fun Fact : 
+1978 : Leslie Lamport invente le "temps logique" (une seule colonne). L'horloge vectorielle (1988) par Colin Fidge et Friedemann Mattern 
+explosion du Web et du Cloud dans les années 2000, c'est devenu vital.
+Le tournant Amazon (2007) : Amazon a publié un article célèbre sur son système Dynamo (la base de données qui gère leur panier d'achat). Ils y expliquaient utiliser les horloges vectorielles pour garantir que, même si un serveur tombe en panne, le client ne perde jamais ses articles.
+C'est à ce moment-là que l'industrie a réalisé que pour faire du "Big Data" et de la haute disponibilité, il fallait absolument maîtriser ces horloges.
+Aujourd'hui : Présent dans presque tous les systèmes distribués (Cassandra, Riak, Voldemort, etc.).
+
+2. Fonctionnement technique
+Une horloge vectorielle est un tableau d'entiers où chaque case correspond à un participant (P1, P2, P3, ...).
+
+Les 3 règles d'or avec les horloges vectorielles :
+1. Je fais une action locale : J'incrémente mon propre compteur dans le tableau.
+2. j’envoi des données : Je joins mon tableau complet à mon message.
+3. Je reçois des données : Je compare mon tableau avec celui reçu. Pour chaque case, je garde la valeur la plus haute (MAX) et j'incrémente mon propre compteur.
+
+3. Exemple concret : Collaboration mondiale
+* Contexte : 4 utilisateurs (USA, France, Russe, Chinois) sur un document partagé.
+* Structure : Un vecteur à 4 colonnes : [USA, FRA, RUS, CHI].
+* Initialisation : Tout le monde commence à [0, 0, 0, 0].
+
+Scénario de conflit :
+* La France travaille seule : son horloge devient [0, 1, 0, 0].
+* Le Chinois travaille seul en même temps : son horloge devient [0, 0, 0, 1].
+* Analyse du serveur : En comparant les deux, le serveur voit que la France ignore l'action du Chinois (0 < 1) et que le chinois ignore l'action de la France (0 < 1).
+* Conclusion : Concurrence détectée ➔ Besoin de fusionner les modifications.
+
+2 CAS DE FIGURE
+Sur google doc : c’est rare les conflits mais pour bien comprendre on peut prendre l’exemple de git
+-> deux utilisateur modifie une même ligne sur le site et git va demander au user qui push en dernier de choisir ce qui reste (ou merge de manière automatique mais vous demande quand même)
+Sinon le système va géré de manière automatique la synchronisation du document
+
+⚖️ 4. Comparaison mathématique (V vs W)
+Soit V l'horloge de l'utilisateur Bob et W celle de l'utilisateur Marley :
+* Causalité (V < W) : Toutes les valeurs de V sont inférieur ou égales à celles de W. L'événement V a "causé" ou précédé W (exemple : [2, 0, 3, 1] et [4, 0, 7, 2])
+* Concurrence (V || W) : Certaines valeurs sont plus grandes dans V et d'autres dans W. Les deux ont travaillé en même temps (exemple : [2, 0, 3, 4] et [3, 0, 1, 2])
+
+Cas de causalité : L’analyse du système : Le système voit que chaque chiffre de $W$ est supérieur ou égal à celui de $V$. Cela signifie que lorsque l'événement $W$ a été créé, l'auteur de $W$ avait déjà connaissance de tout ce qui s'était passé dans $V$.
+Ce qu'il se passe : C'est une mise à jour séquentielle.
+* Le système considère que $W$ est la version "la plus à jour".
+* Il remplace simplement l'ancienne valeur ($V$) par la nouvelle ($W$).
+* Résultat : Pas de conflit, la synchronisation est fluide. C'est comme si tu corrigeais une faute d'orthographe que quelqu'un d'autre vient de faire.
+
+On pourrait croire que W est plus récent.
+* MAIS, le troisième chiffre de V (3) est plus grand que celui de W (1).
+Ce qu'il se passe : C'est un conflit de version.
+* Le système comprend que l'auteur de V ne connaissait pas le travail de l'auteur de W, et inversement. Ils ont travaillé "en parallèle" sur une base commune mais ont divergé.
+
+1. La fusion sémantique (Le mode intelligent)
+C'est ce qu'utilise Google Docs ou Figma. Le système analyse le contenu des modifications.
+* Exemple : Si Bob a corrigé une faute au début du texte et Marley a ajouté une phrase à la fin, le système est capable de fusionner les deux automatiquement sans rien demander à personne.
+* Technique : On utilise souvent des algorithmes appelés CRDT (Conflict-free Replicated Data Types) qui garantissent que, peu importe l'ordre des mélanges, tout le monde finit avec le même texte.
+
+2. Le "Dernier Écrivain Gagne" (Last Writer Wins - LWW)
+C'est la méthode la plus simple, mais la plus "brutale".
+* Le principe : Même si les horloges vectorielles disent que c'est concurrent, on regarde l'heure (le timestamp physique) des deux messages. Celui qui a été envoyé à 14h00:00.002 gagne sur celui de 14h00:00.001.
+* Risque : On perd définitivement les données de la personne qui a perdu le duel de millisecondes. C'est rapide, mais risqué pour la collaboration.
+
+3. La résolution manuelle (Le mode prudent)
+C'est ce que tu vis quand tu utilises Git (pour le code) ou quand Dropbox crée un "Copie de fichier en conflit".
+* Le principe : Le système dit : « Je ne sais pas choisir, je garde les deux versions ».
+* L'action : Il affiche les deux versions à l'utilisateur et lui demande de choisir laquelle garder ou de fusionner les lignes à la main.
+
+5. Cas d'usage et Limites
+* Où on les trouve ?
+    * Bases de données distribuées (Cassandra, Riak, DynamoDB).
+    * Systèmes de fichiers synchronisés.
+    * Logiciels de collaboration (Google Docs, Figma - via des variantes comme les CRDT).
+* Le point faible :
+    * Scalabilité : La taille du vecteur grandit avec le nombre de participants. Si vous êtes 10 000, le message devient très lourd (un tableau de 10 000 chiffres à chaque envoi).
+    * -> probleme de latence réseau, calcul processeur et stockage
+
+Pourquoi on les utilise quand même ?
+Parce que pour des groupes de taille raisonnable (une équipe sur un Google Doc, un cluster de 10 serveurs de base de données), le coût est négligeable par rapport à la sécurité de ne jamais perdre de données.
+Les alternatives pour les très gros systèmes :
+* Dotted Version Vectors : Une version optimisée pour réduire la taille.
+* Pruning (Élagage) : On retire les vieux participants qui n'ont pas bougé depuis longtemps du tableau pour réduire sa taille.
+* Horloges de Lamport : Un seul chiffre au lieu d'un tableau, mais attention : elles ne détectent pas les conflits, elles disent juste qui est arrivé en premier.
+
+6. La phrase à retenir pour conclure
+"L'horloge vectorielle ne sert pas à savoir quelle heure il est, mais à savoir qui savait quoi au moment où il a agi."

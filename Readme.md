@@ -33,7 +33,7 @@ C'est le **problème du consensus distribué**, et Paxos est l'une des solutions
 
 ## 2. Historique et origine
 
-- **1989 :** Leslie Lamport conçoit l'algorithme Paxos. Initialement, elle cherchait à démontrer qu'un tel algorithme *ne pouvait pas exister* — elle a trouvé le contraire.
+- **1989 :** Leslie Lamport conçoit l'algorithme Paxos. Initialement, il cherchait à démontrer qu'un tel algorithme *ne pouvait pas exister* — il a trouvé le contraire.
 - **1990 :** Soumission du papier original *"The Part-Time Parliament"*, mais il est jugé trop difficile à comprendre et rejeté par les reviewers.
 - **1998 :** Publication officielle dans un journal scientifique, 8 ans après la soumission initiale.
 - **2001 :** Lamport publie *"Paxos Made Simple"* pour clarifier l'algorithme.

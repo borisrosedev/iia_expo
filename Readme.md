@@ -13,7 +13,8 @@
 9. [Paxos vs Raft](#9-paxos-vs-raft)
 10. [Limites de Paxos](#10-limites-de-paxos)
 11. [Exercice](#11-exercice)
-12. [Glossaire](#12-glossaire)
+12. [Paxos en uhe phrase](#12-paxos-en-une-phrase)
+13. [Glossaire](#13-glossaire)
 
 ---
 
@@ -242,7 +243,14 @@ Google Chubby ✅
 
 ---
 
-## 12. Glossaire
+## 12. Paxos en une phrase 
+
+En conclusion, on peut dire que « Le handshake TLS est la phase de mise en confiance cryptographique
+entre un client et un serveur. »
+
+De même, Paxos est la phase de mise en confiance entre des nœuds distribués — garantissant qu'ils s'accordent tous sur la même vérité.
+
+## 13. Glossaire
 
 | Terme | Définition |
 |-------|-----------|
